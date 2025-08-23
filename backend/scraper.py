@@ -6,7 +6,6 @@ import time
 from urllib.parse import urljoin, urlparse
 import logging
 
-# Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -15,13 +14,11 @@ def clean_text(text: str) -> str:
     if not text:
         return ""
     
-    # Replace multiple whitespace with single space
     text = re.sub(r'\s+', ' ', text)
     
-    # Remove certain unwanted patterns but preserve basic punctuation
     text = re.sub(r'[^\w\s.,!?;:()\-\'"]+', '', text)
     
-    # Remove excessive punctuation
+   
     text = re.sub(r'\.{3,}', '...', text)
     text = re.sub(r'-{2,}', '--', text)
     
@@ -39,7 +36,6 @@ def get_headers() -> Dict[str, str]:
     }
 
 def is_valid_url(url: str) -> bool:
-    """Validate URL format"""
     try:
         result = urlparse(url)
         return all([result.scheme, result.netloc])
@@ -76,7 +72,7 @@ def remove_unwanted_elements(soup: BeautifulSoup) -> None:
             element.decompose()
 
 def extract_title(soup: BeautifulSoup) -> str:
-    """Extract title with multiple fallback strategies"""
+    """Extract title with multiple fallback so we can have more robustness"""
     title_selectors = [
         'h1.title',
         'h1.post-title', 
@@ -92,14 +88,14 @@ def extract_title(soup: BeautifulSoup) -> str:
         element = soup.select_one(selector)
         if element:
             title = element.get_text().strip()
-            if title and len(title) > 5:  # Avoid very short titles
+            if title and len(title) > 5:  # no super short titles
                 return clean_text(title)
     
     return "Untitled"
 
 def extract_content(soup: BeautifulSoup) -> str:
     """Extract main content with improved selectors"""
-    # Priority content selectors (most specific first)
+   
     content_selectors = [
         'article .content',
         'article .post-content',
@@ -123,7 +119,7 @@ def extract_content(soup: BeautifulSoup) -> str:
     for selector in content_selectors:
         content_element = soup.select_one(selector)
         if content_element:
-            # Extract paragraphs preferentially
+          
             paragraphs = content_element.find_all('p')
             if paragraphs:
                 content = ' '.join([p.get_text().strip() for p in paragraphs if p.get_text().strip()])
@@ -132,14 +128,14 @@ def extract_content(soup: BeautifulSoup) -> str:
             
             content = clean_text(content)
             
-            # Content quality checks
+          
             if len(content) > 200 and len(content.split()) > 50:
                 return content
     
-    # Final fallback - try body but filter out likely non-content
+
     body = soup.find('body')
     if body:
-        # Remove navigation and other non-content elements
+       
         for nav in body.find_all(['nav', 'header', 'footer', 'aside']):
             nav.decompose()
         
@@ -150,10 +146,7 @@ def extract_content(soup: BeautifulSoup) -> str:
     return ""
 
 def extract_article_content(url: str, retry_count: int = 2) -> Optional[Dict[str, str]]:
-    """
-    Extract title and content from a web article with improved robustness
-    Returns dict with 'title', 'content', 'url'
-    """
+   
     if not is_valid_url(url):
         logger.error(f"Invalid URL format: {url}")
         return None
@@ -165,7 +158,7 @@ def extract_article_content(url: str, retry_count: int = 2) -> Optional[Dict[str
             session = requests.Session()
             session.headers.update(get_headers())
             
-            # Add delay between attempts
+            # Add delay 
             if attempt > 0:
                 time.sleep(2)
             
