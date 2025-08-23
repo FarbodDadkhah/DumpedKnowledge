@@ -1,7 +1,3 @@
-#!/usr/bin/env python3
-"""
-Test script to verify all API functionality works with the new improvements
-"""
 
 import requests
 import json
@@ -10,12 +6,11 @@ import time
 BASE_URL = "http://localhost:8000"
 
 def test_api():
-    """Test the complete API workflow"""
     
     print("Testing Personal Research Companion API")
     print("=" * 50)
     
-    # Test 1: Check if API is running
+    # Test 1
     print("\n1. Testing API health...")
     try:
         response = requests.get(f"{BASE_URL}/")
@@ -28,7 +23,7 @@ def test_api():
         print(f"❌ Could not connect to API: {e}")
         return
     
-    # Test 2: User registration
+    # Test 2
     print("\n2. Testing user registration...")
     user_data = {
         "email": f"test_{int(time.time())}@example.com",  # Unique email
@@ -64,13 +59,13 @@ def test_api():
         print(f"❌ Login error: {e}")
         return
     
-    # Set up headers for authenticated requests
+   
     headers = {"Authorization": f"Bearer {access_token}"}
     
     # Test 4: Add article (test scraping + ChromaDB embedding)
     print("\n4. Testing article addition with improved scraping...")
     article_data = {
-        "url": "https://httpbin.org/html",  # Reliable test URL
+        "url": "https://httpbin.org/html",  
         "tags": "test,demo"
     }
     
@@ -107,7 +102,7 @@ def test_api():
     # Test 6: Search with ChromaDB (semantic search)
     print("\n6. Testing semantic search with ChromaDB...")
     search_data = {
-        "query": "Herman Melville whale",  # Should match the test HTML content
+        "query": "Herman Melville whale",  
         "limit": 3
     }
     
@@ -125,7 +120,7 @@ def test_api():
     except Exception as e:
         print(f"❌ Search error: {e}")
     
-    # Test 7: Q&A with GPT-4o-mini
+    # Test 7: Q&A 
     print("\n7. Testing Q&A with GPT-4o-mini...")
     qa_data = {
         "question": "What is this article about?",
