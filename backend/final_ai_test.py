@@ -1,7 +1,3 @@
-#!/usr/bin/env python3
-"""
-Final test to validate AI processing improvements
-"""
 
 import requests
 import json
@@ -10,12 +6,12 @@ import time
 BASE_URL = "http://localhost:8000"
 
 def final_ai_test():
-    """Test AI processing with realistic scenarios"""
+    
     
     print("Final AI Processing Test")
     print("=" * 50)
     
-    # Register test user
+
     user_data = {
         "email": f"final_test_{int(time.time())}@example.com",
         "password": "testpassword123"
@@ -25,7 +21,7 @@ def final_ai_test():
     access_token = response.json()["access_token"]
     headers = {"Authorization": f"Bearer {access_token}"}
     
-    # Add a real article (known content)
+  
     print("\n1. Adding real articles...")
     
     test_articles = [
@@ -42,7 +38,7 @@ def final_ai_test():
             print(f"✅ Added: {article['title']}")
             print(f"   Content: {len(article['content'])} chars")
     
-    # Test complex Q&A scenarios
+   
     complex_queries = [
         {
             "question": "What challenges does Perth face as a blacksmith?",
@@ -95,7 +91,7 @@ def final_ai_test():
                 best_similarity = max(s['similarity_score'] for s in sources)
                 print(f"Best similarity: {best_similarity:.4f}")
                 
-                # Quality indicators
+               
                 if len(answer) > 100:
                     print("✓ Detailed answer")
                 if best_similarity > 0.3:
