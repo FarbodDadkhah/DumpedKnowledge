@@ -1,7 +1,3 @@
-#!/usr/bin/env python3
-"""
-Test script for the improved scraper functionality
-"""
 
 import sys
 import os
@@ -11,13 +7,12 @@ from scraper import extract_article_content
 import time
 
 def test_scraper():
-    """Test the scraper with various URLs"""
-    
+   
     # Test URLs with different website structures
     test_urls = [
-        "https://example.com",  # Simple test page
-        "https://en.wikipedia.org/wiki/Python_(programming_language)",  # Wikipedia
-        "https://httpbin.org/html",  # Simple HTML test page
+        "https://example.com",  
+        "https://en.wikipedia.org/wiki/Python_(programming_language)",
+        "https://httpbin.org/html", 
     ]
     
     print("Testing web scraper functionality...")
@@ -37,7 +32,7 @@ def test_scraper():
                 print(f"Word count: {len(result['content'].split())} words")
                 print(f"Final URL: {result['url']}")
                 
-                # Show first 200 characters of content
+               
                 preview = result['content'][:200].replace('\n', ' ')
                 print(f"Preview: {preview}...")
                 
@@ -47,7 +42,7 @@ def test_scraper():
         except Exception as e:
             print(f"❌ ERROR - {str(e)}")
         
-        # Small delay between requests
+        
         time.sleep(1)
     
     print("\n" + "=" * 50)
@@ -72,7 +67,7 @@ def test_edge_cases():
         
         try:
             if url is None:
-                # Skip None test as it would cause TypeError
+                
                 print("❌ EXPECTED - None input not allowed")
                 continue
                 
