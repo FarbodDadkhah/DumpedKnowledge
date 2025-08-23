@@ -20,15 +20,14 @@ from embeddings import embedding_service
 
 load_dotenv()
 
-# Initialize OpenAI client
+
 client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
+    
     create_tables()
     yield
-    # Shutdown
     pass
 
 app = FastAPI(title="Personal Research Companion API", version="1.0.0", lifespan=lifespan)
@@ -42,7 +41,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Pydantic models
+# Pydantic 
 class UserCreate(BaseModel):
     email: str
     password: str
@@ -82,7 +81,6 @@ class QAQuery(BaseModel):
 # Auth endpoints
 @app.post("/auth/register", response_model=Token)
 async def register(user: UserCreate, db: Session = Depends(get_db)):
-    # Check if user exists
     db_user = get_user_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(
@@ -90,10 +88,9 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
             detail="Email already registered"
         )
     
-    # Create user
+
     created_user = create_user(db, email=user.email, password=user.password)
     
-    # Create access token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": created_user.email},
@@ -120,14 +117,14 @@ async def login(user: UserLogin, db: Session = Depends(get_db)):
     
     return {"access_token": access_token, "token_type": "bearer"}
 
-# Article endpoints
+
 @app.post("/articles", response_model=ArticleResponse)
 async def create_article(
     article_data: ArticleCreate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    # Extract content from URL
+  
     scraped_data = extract_article_content(article_data.url)
     if not scraped_data:
         raise HTTPException(
@@ -135,7 +132,7 @@ async def create_article(
             detail="Could not extract content from URL"
         )
     
-    # Create article in database
+    
     db_article = Article(
         title=scraped_data['title'],
         url=scraped_data['url'],
@@ -204,7 +201,7 @@ async def search_articles(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    # Search using ChromaDB
+   
     similar_results = embedding_service.search_similar_articles(
         query=search_query.query,
         user_id=current_user.id,
@@ -243,7 +240,7 @@ async def answer_question(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    # Search for relevant articles using ChromaDB
+   
     similar_results = embedding_service.search_similar_articles(
         query=qa_query.question,
         user_id=current_user.id,
@@ -253,11 +250,11 @@ async def answer_question(
     if not similar_results:
         return {"answer": "No articles found in your collection to answer this question."}
     
-    # Get context from similar articles
+   
     context_parts = []
     source_articles = []
     
-    # Adaptive threshold based on best score
+
     max_similarity = max([score for _, score, _ in similar_results], default=0)
     adaptive_threshold = max(0.12, min(0.25, max_similarity * 0.6))  # Dynamic threshold
     
@@ -269,7 +266,7 @@ async def answer_question(
             ).first()
             
             if article:
-                # Get more context for this article using the query for better relevance
+                #increasing relevance
                 full_context = embedding_service.get_article_context(
                     article_id, 
                     query=qa_query.question, 
@@ -287,7 +284,7 @@ async def answer_question(
     
     context = "\n\n".join(context_parts)
     
-    # Generate answer using OpenAI GPT-4o-mini
+   
     try:
         response = client.chat.completions.create(
             model="gpt-4o-mini",
